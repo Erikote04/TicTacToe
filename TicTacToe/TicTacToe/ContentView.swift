@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var moves: [Move?] = Array(repeating: nil, count: 9)
+    @State private var isGameboardDisabled: Bool = false
     
     let columns: [GridItem] = [
         GridItem(.flexible()),
@@ -39,10 +40,12 @@ struct ContentView: View {
                         .onTapGesture {
                             if isSquareOccupied(in: moves, forIndex: i) { return }
                             moves[i] = Move(player: .human , boardIndex: i)
+                            isGameboardDisabled = true
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 let computerPosition = determineComputerMovePosition(in: moves)
                                 moves[computerPosition] = Move(player: .computer , boardIndex: computerPosition)
+                                isGameboardDisabled = false
                             }
                         }
                     }
@@ -50,6 +53,7 @@ struct ContentView: View {
                 
                 Spacer()
             }
+            .disabled(isGameboardDisabled)
             .padding()
         }
     }
