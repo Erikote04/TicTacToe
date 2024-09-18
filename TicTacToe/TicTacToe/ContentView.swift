@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var moves: [Move?] = Array(repeating: nil, count: 9)
+    @State private var isHumansTurn: Bool = true
+    
     let columns: [GridItem] = [
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -29,10 +32,14 @@ struct ContentView: View {
                                     height: geometry.size.width / 3 - 15
                                 )
                             
-                            Image(systemName: "xmark")
+                            Image(systemName: moves[i]?.indicator ?? "")
                                 .resizable()
                                 .frame(width: 40, height: 40)
                                 .foregroundStyle(.white)
+                        }
+                        .onTapGesture {
+                            moves[i] = Move(player: isHumansTurn ? .human : .computer, boardIndex: i)
+                            isHumansTurn.toggle()
                         }
                     }
                 }
@@ -41,6 +48,20 @@ struct ContentView: View {
             }
             .padding()
         }
+    }
+}
+
+enum Player {
+    case human
+    case computer
+}
+
+struct Move {
+    let player: Player
+    let boardIndex: Int
+    
+    var indicator: String {
+        return player == .human ? "xmark" : "circle"
     }
 }
 
