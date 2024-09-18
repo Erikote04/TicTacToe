@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    // MARK: Properties
+    
     @State private var moves: [Move?] = Array(repeating: nil, count: 9)
     @State private var isGameboardDisabled: Bool = false
     @State private var alertItem: AlertItem?
@@ -17,6 +20,8 @@ struct ContentView: View {
         GridItem(.flexible()),
         GridItem(.flexible()),
     ]
+    
+    // MARK: View
     
     var body: some View {
         GeometryReader { geometry in
@@ -87,11 +92,58 @@ struct ContentView: View {
         }
     }
     
+    // MARK: Functions
+    
     func isSquareOccupied(in moves: [Move?], forIndex index: Int) -> Bool {
-        moves.contains { $0?.boardIndex == index }
+        moves.contains(where: { $0?.boardIndex == index })
     }
     
+    /**
+     determineComputerMovePosition(in moves: [Move?]) -> Int
+     - parameter moves: game board
+     - returns: the chosen square
+     - description: If AI can win, then win -> If AI can't win, then block -> If AI can't block, then take middle square -> If AI can't take middle square, take random available square.
+     */
     func determineComputerMovePosition(in moves: [Move?]) -> Int {
+        // If AI can win, then win
+        let winPatterns: Set<Set<Int>> = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // horizontal
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertical
+            [0, 4, 8], [2, 4, 6]             // diagonal
+        ]
+        
+        let computerMoves = moves.compactMap { $0 }.filter { $0.player == .computer }
+        let computerPositions = Set(computerMoves.map { $0.boardIndex })
+        
+        for pattern in winPatterns {
+            let winPositions = pattern.subtracting(computerPositions)
+            
+            if winPositions.count == 1 {
+                let isAvailable = !isSquareOccupied(in: moves, forIndex: winPositions.first!)
+                if isAvailable { return winPositions.first! }
+            }
+        }
+        
+        // If AI can't win, then block
+        let humanMoves = moves.compactMap { $0 }.filter { $0.player == .human }
+        let humanPositions = Set(humanMoves.map { $0.boardIndex })
+        
+        for pattern in winPatterns {
+            let winPositions = pattern.subtracting(humanPositions)
+            
+            if winPositions.count == 1 {
+                let isAvailable = !isSquareOccupied(in: moves, forIndex: winPositions.first!)
+                if isAvailable { return winPositions.first! }
+            }
+        }
+        
+        // If AI can't block, then take middle square
+        let middleSquare = 4
+        if !isSquareOccupied(in: moves, forIndex: middleSquare) {
+            return middleSquare
+        }
+        
+        // If AI can't take middle square, take random available square
         var movePosition = Int.random(in: 0..<9)
         
         while isSquareOccupied(in: moves, forIndex: movePosition) {
@@ -124,6 +176,8 @@ struct ContentView: View {
         moves = Array(repeating: nil, count: 9)
     }
 }
+
+// MARK: Model
 
 enum Player {
     case human
