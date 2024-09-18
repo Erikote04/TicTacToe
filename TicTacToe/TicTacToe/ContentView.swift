@@ -55,6 +55,16 @@ struct ContentView: View {
     func isSquareOccupied(in moves: [Move?], forIndex index: Int) -> Bool {
         moves.contains { $0?.boardIndex == index }
     }
+    
+    func determineComputerMovePosition(in moves: [Move?]) -> Int {
+        var movePosition = Int.random(in: 0..<9)
+        
+        while isSquareOccupied(in: moves, forIndex: movePosition) {
+            var movePosition = Int.random(in: 0..<9)
+        }
+        
+        return movePosition
+    }
 }
 
 enum Player {
